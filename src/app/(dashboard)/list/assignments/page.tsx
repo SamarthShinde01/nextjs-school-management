@@ -52,7 +52,7 @@ export default function AssignmentsListPage() {
 			<td className="hidden lg:table-cell">{item.dueDate}</td>
 			<td>
 				<div className="flex items-center gap-2">
-					<Link href={`/list/Assignments/${item.id}`}>
+					<Link href={`/list/assignments/${item.id}`}>
 						<button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky">
 							<Image src="/edit.png" alt="" width={16} height={16} />
 						</button>
