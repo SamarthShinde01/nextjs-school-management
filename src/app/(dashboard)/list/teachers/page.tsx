@@ -2,10 +2,10 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, teachersData } from "@/lib/data";
+import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Class, Subject, Teacher } from "@prisma/client";
+import { Class, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 
 type TeachersListType = Teacher & { subjects: Subject[] } & {
@@ -53,16 +53,40 @@ export default async function TeachersListPage({
 }: {
 	searchParams: any;
 }) {
-	const { page } = await searchParams;
+	const { page, ...queryParams } = await searchParams;
+
 	const p = page ? parseInt(page) : 1;
+
+	//URL PARAMS CONDITION
+
+	const query: Prisma.TeacherWhereInput = {};
+
+	if (queryParams) {
+		for (const [key, value] of Object.entries(queryParams)) {
+			if (value !== undefined) {
+				switch (key) {
+					case "classId":
+						query.lessons = {
+							some: {
+								classId: parseInt(value),
+							},
+						};
+				}
+			}
+		}
+	}
 
 	const [data, count] = await prisma.$transaction([
 		prisma.teacher.findMany({
-			include: { subjects: true, classes: true },
+			where: query,
+			include: {
+				subjects: true,
+				classes: true,
+			},
 			take: ITEM_PER_PAGE,
 			skip: ITEM_PER_PAGE * (p - 1),
 		}),
-		prisma.teacher.count(),
+		prisma.teacher.count({ where: query }),
 	]);
 
 	const renderRow = (item: TeachersListType) => (
