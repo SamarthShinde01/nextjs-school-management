@@ -108,7 +108,7 @@ export default async function TeachersListPage({
 
 	if (queryParams) {
 		for (const [key, value] of Object.entries(queryParams)) {
-			if (value !== undefined) {
+			if (value !== null && typeof value === "string") {
 				switch (key) {
 					case "classId":
 						query.lessons = {

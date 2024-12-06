@@ -7,9 +7,8 @@ import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Parent, Prisma, Student } from "@prisma/client";
 import Image from "next/image";
-import Link from "next/link";
 
-type ParentListTypes = Parent & { student: Student[] };
+type ParentListTypes = Parent & { students: Student[] };
 
 const columns = [
 	{
@@ -37,7 +36,7 @@ const columns = [
 	},
 ];
 
-const renderRow = (item: Parent) => (
+const renderRow = (item: ParentListTypes) => (
 	<tr
 		key={item.id}
 		className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
@@ -77,11 +76,11 @@ export default async function ParentsListPage({
 
 	//URL PARAMS CONDITION
 
-	const query: Prisma.TeacherWhereInput = {};
+	const query: Prisma.ParentWhereInput = {};
 
 	if (queryParams) {
 		for (const [key, value] of Object.entries(queryParams)) {
-			if (value !== undefined) {
+			if (value !== null && typeof value === "string") {
 				switch (key) {
 					case "search":
 						query.name = { contains: value, mode: "insensitive" };
@@ -101,7 +100,7 @@ export default async function ParentsListPage({
 			take: ITEM_PER_PAGE,
 			skip: ITEM_PER_PAGE * (p - 1),
 		}),
-		prisma.teacher.count({ where: query }),
+		prisma.parent.count({ where: query }),
 	]);
 
 	return (
