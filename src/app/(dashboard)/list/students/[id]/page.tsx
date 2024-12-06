@@ -147,7 +147,7 @@ export default function SingleStudentPage() {
 						</Link>
 						<Link
 							className="p-4 rounded-md bg-lamaYellowLight"
-							href={`/list/results?classId=${2}`}
+							href={`/list/results?studentId=${"student2"}`}
 						>
 							Student&apos;s Results
 						</Link>
