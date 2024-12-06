@@ -2,16 +2,14 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, assignmentsData } from "@/lib/data";
+import { role } from "@/lib/data";
+import prisma from "@/lib/prisma";
+import { ITEM_PER_PAGE } from "@/lib/settings";
+import { Assignment, Class, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
-import Link from "next/link";
 
-type Assignment = {
-	id: number;
-	subject: string;
-	class: string;
-	teacher: string;
-	dueDate: string;
+type AssignmentListTypes = Assignment & {
+	lesson: { subject: Subject; class: Class; teacher: Teacher };
 };
 
 const columns = [
@@ -41,33 +39,91 @@ const columns = [
 	},
 ];
 
-export default function AssignmentsListPage() {
-	const renderRow = (item: Assignment) => (
-		<tr
-			key={item.id}
-			className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
-		>
-			<td className="gap-4 p-4">{item.subject}</td>
-			<td className="hidden md:table-cell">{item.class}</td>
-			<td className="hidden lg:table-cell">{item.teacher}</td>
-			<td className="hidden lg:table-cell">{item.dueDate}</td>
-			<td>
-				<div className="flex items-center gap-2">
-					{role === "admin" && (
-						<>
-							<FormModal
-								table="assignment"
-								type="update"
-								data={item}
-								id={item.id}
-							/>
-							<FormModal table="assignment" type="delete" id={item.id} />
-						</>
-					)}
-				</div>
-			</td>
-		</tr>
-	);
+const renderRow = (item: AssignmentListTypes) => (
+	<tr
+		key={item.id}
+		className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+	>
+		<td className="gap-4 p-4">{item.lesson.subject.name}</td>
+		<td className="hidden md:table-cell">{item.lesson.class.name}</td>
+		<td className="hidden lg:table-cell">
+			{item.lesson.teacher.name + " " + item.lesson.teacher.surname}
+		</td>
+		<td className="hidden lg:table-cell">
+			{new Date(item.dueDate).toDateString()}
+		</td>
+		<td>
+			<div className="flex items-center gap-2">
+				{role === "admin" && (
+					<>
+						<FormModal
+							table="assignment"
+							type="update"
+							data={item}
+							id={item.id}
+						/>
+						<FormModal table="assignment" type="delete" id={item.id} />
+					</>
+				)}
+			</div>
+		</td>
+	</tr>
+);
+
+export default async function AssignmentsListPage({
+	searchParams,
+}: {
+	searchParams: any;
+}) {
+	const { page, ...queryParams } = await searchParams;
+
+	const p = page ? parseInt(page) : 1;
+
+	//URL PARAMS CONDITION
+
+	const query: Prisma.AssignmentWhereInput = {};
+
+	if (queryParams) {
+		for (const [key, value] of Object.entries(queryParams)) {
+			if (value !== null && typeof value === "string") {
+				switch (key) {
+					case "classId":
+						query.lesson = { classId: parseInt(value) };
+						break;
+					case "teacherId":
+						query.lesson = { teacherId: value };
+						break;
+					case "search":
+						query.lesson = {
+							subject: {
+								name: { contains: value, mode: "insensitive" },
+							},
+						};
+						break;
+					default:
+						break;
+				}
+			}
+		}
+	}
+
+	const [data, count] = await prisma.$transaction([
+		prisma.assignment.findMany({
+			where: query,
+			include: {
+				lesson: {
+					select: {
+						subject: { select: { name: true } },
+						class: { select: { name: true } },
+						teacher: { select: { name: true, surname: true } },
+					},
+				},
+			},
+			take: ITEM_PER_PAGE,
+			skip: ITEM_PER_PAGE * (p - 1),
+		}),
+		prisma.assignment.count({ where: query }),
+	]);
 
 	return (
 		<div className="bg-white rounded-md flex-1 p-4 m-4 mt-0">
@@ -94,10 +150,10 @@ export default function AssignmentsListPage() {
 			</div>
 
 			{/* LIST */}
-			<Table columns={columns} renderRow={renderRow} data={assignmentsData} />
+			<Table columns={columns} renderRow={renderRow} data={data} />
 
 			{/* PAGINATION */}
-			<Pagination />
+			<Pagination page={p} count={count} />
 		</div>
 	);
 }

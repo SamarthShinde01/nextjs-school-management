@@ -81,10 +81,8 @@ export default async function LessonsListPage({
 						query.teacherId = value;
 						break;
 					case "search":
-						query.OR = [
-							{ subject: { name: { contains: value, mode: "insensitive" } } },
-							{ teacher: { name: { contains: value, mode: "insensitive" } } },
-						];
+						query.name = { contains: value, mode: "insensitive" };
+						break;
 					default:
 						break;
 				}
