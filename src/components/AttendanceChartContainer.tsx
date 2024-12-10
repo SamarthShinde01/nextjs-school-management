@@ -2,7 +2,7 @@ import Image from "next/image";
 import AttendanceChart from "./AttendanceChart";
 import prisma from "@/lib/prisma";
 
-export const AttendanceChartContainer = async () => {
+const AttendanceChartContainer = async () => {
 	const today = new Date();
 	const dayOfWeek = today.getDay();
 	const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -63,3 +63,5 @@ export const AttendanceChartContainer = async () => {
 		</div>
 	);
 };
+
+export default AttendanceChartContainer;
