@@ -2,12 +2,11 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, resultsData } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Class, Prisma, Result, Student, Teacher } from "@prisma/client";
+import { currentUserId, role } from "@/lib/utils";
+import { Prisma } from "@prisma/client";
 import Image from "next/image";
-import Link from "next/link";
 
 type ResultListTypes = {
 	id: number;
@@ -50,10 +49,14 @@ const columns = [
 		accessor: "date",
 		className: "hidden lg:table-cell",
 	},
-	{
-		header: "Actions",
-		accessor: "action",
-	},
+	...(role === "admin" || role === "teacher"
+		? [
+				{
+					header: "Actions",
+					accessor: "action",
+				},
+		  ]
+		: []),
 ];
 
 const renderRow = (item: ResultListTypes) => (
@@ -75,7 +78,7 @@ const renderRow = (item: ResultListTypes) => (
 		</td>
 		<td>
 			<div className="flex items-center gap-2">
-				{role === "admin" && (
+				{(role === "admin" || role === "teacher") && (
 					<>
 						<FormModal table="result" type="update" data={item} id={item.id} />
 						<FormModal table="result" type="delete" id={item.id} />
@@ -117,6 +120,28 @@ export default async function ResultsListPage({
 				}
 			}
 		}
+	}
+
+	//ROLE CONDITIONS
+
+	switch (role) {
+		case "admin":
+			break;
+		case "teacher":
+			query.OR = [
+				{ exam: { lesson: { teacherId: currentUserId! } } },
+				{ assignment: { lesson: { teacherId: currentUserId! } } },
+			];
+			break;
+		case "student":
+			query.studentId = currentUserId!;
+			break;
+		case "parent":
+			query.student = {
+				parentId: currentUserId!,
+			};
+		default:
+			break;
 	}
 
 	const [dataRes, count] = await prisma.$transaction([
@@ -188,7 +213,9 @@ export default async function ResultsListPage({
 							<Image src="/sort.png" alt="" width={14} height={14} />
 						</button>
 
-						{role === "admin" && <FormModal table="result" type="create" />}
+						{(role === "admin" || role === "teacher") && (
+							<FormModal table="result" type="create" />
+						)}
 					</div>
 				</div>
 			</div>
