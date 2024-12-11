@@ -1,8 +1,32 @@
 "use client";
 
 import Image from "next/image";
-import { Dispatch, SetStateAction, useState } from "react";
+import {
+	Dispatch,
+	SetStateAction,
+	useActionState,
+	useEffect,
+	useState,
+} from "react";
 import dynamic from "next/dynamic";
+import { deleteSubject } from "@/lib/actions";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+
+const deleteActionMap = {
+	subject: deleteSubject,
+	class: deleteSubject,
+	teacher: deleteSubject,
+	student: deleteSubject,
+	parent: deleteSubject,
+	lesson: deleteSubject,
+	exam: deleteSubject,
+	assignment: deleteSubject,
+	result: deleteSubject,
+	attendance: deleteSubject,
+	event: deleteSubject,
+	announcement: deleteSubject,
+};
 
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
 	loading: () => <h1>Loading...</h1>,
@@ -66,8 +90,27 @@ export default function FormModal({
 	const [open, setOpen] = useState(false);
 
 	const Form = () => {
+		const [state, formAction] = useActionState(deleteActionMap[table], {
+			success: false,
+			error: false,
+		});
+
+		const router = useRouter();
+
+		useEffect(() => {
+			if (state.success) {
+				toast.error("Subject has been deleted!");
+				setOpen(false);
+				router.refresh();
+			}
+		}, [state]);
+
 		return type === "delete" && id ? (
-			<form action="" className="p-4 flex flex-col gap-4 items-center">
+			<form
+				action={formAction}
+				className="p-4 flex flex-col gap-4 items-center"
+			>
+				<input type="text | number" name="id" value={id} hidden />
 				<span className="text-center font-medium">
 					All data will be lost. Are you sure you want to delete this {table} ?
 				</span>
