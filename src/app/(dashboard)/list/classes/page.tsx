@@ -1,4 +1,4 @@
-import FormModal from "@/components/FormModal";
+import FormContainer from "@/components/FormContainer";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -55,8 +55,13 @@ const renderRow = (item: ClassListTypes) => (
 			<div className="flex items-center gap-2">
 				{role === "admin" && (
 					<>
-						<FormModal table="class" type="update" data={item} id={item.id} />
-						<FormModal table="announcement" type="delete" id={item.id} />
+						<FormContainer
+							table="class"
+							type="update"
+							data={item}
+							id={item.id}
+						/>
+						<FormContainer table="class" type="delete" id={item.id} />
 					</>
 				)}
 			</div>
@@ -122,7 +127,7 @@ export default async function ClassessListPage({
 							<Image src="/sort.png" alt="" width={14} height={14} />
 						</button>
 
-						{role === "admin" && <FormModal table="class" type="create" />}
+						{role === "admin" && <FormContainer table="class" type="create" />}
 					</div>
 				</div>
 			</div>
