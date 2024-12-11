@@ -1,5 +1,7 @@
 import Announcement from "@/components/Announcement";
-import BigCalendar from "@/components/BigCalendar";
+import BigCalendarContainer from "@/components/BigCalendarContainer";
+import { currentUserId } from "@/lib/utils";
+
 export default function TeacherPage() {
 	return (
 		<div className="flex-1 p-4 flex gap-4 flex-col xl:flex-row">
@@ -8,7 +10,7 @@ export default function TeacherPage() {
 				<div className="h-full bg-white rounded-md p-4">
 					<h1 className="text-xl font-semibold">Schedule</h1>
 
-					<BigCalendar />
+					<BigCalendarContainer type="teacherId" id={currentUserId!} />
 				</div>
 			</div>
 
