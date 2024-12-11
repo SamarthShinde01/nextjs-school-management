@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 import { deleteSubject } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { FormContainerProps } from "./FormContainer";
 
 const deleteActionMap = {
 	subject: deleteSubject,
@@ -42,17 +43,33 @@ const forms: {
 	[key: string]: (
 		setOpen: Dispatch<SetStateAction<boolean>>,
 		type: "create" | "update",
-		data?: any
+		data?: any,
+		relatedData?: any
 	) => JSX.Element;
 } = {
-	subject: (setOpen, type, data) => (
-		<SubjectForm type={type} data={data} setOpen={setOpen} />
+	subject: (setOpen, type, data, relatedData) => (
+		<SubjectForm
+			type={type}
+			data={data}
+			setOpen={setOpen}
+			relatedData={relatedData}
+		/>
 	),
-	teacher: (type, data, setOpen) => (
-		<TeacherForm type={type} data={data} setOpen={setOpen} />
+	teacher: (type, data, setOpen, relatedData) => (
+		<TeacherForm
+			type={type}
+			data={data}
+			setOpen={setOpen}
+			relatedData={relatedData}
+		/>
 	),
-	student: (type, data, setOpen) => (
-		<StudentForm type={type} data={data} setOpen={setOpen} />
+	student: (type, data, setOpen, relatedData) => (
+		<StudentForm
+			type={type}
+			data={data}
+			setOpen={setOpen}
+			relatedData={relatedData}
+		/>
 	),
 };
 
@@ -61,24 +78,8 @@ export default function FormModal({
 	type,
 	data,
 	id,
-}: {
-	table:
-		| "teacher"
-		| "student"
-		| "parent"
-		| "subject"
-		| "class"
-		| "lesson"
-		| "exam"
-		| "assignment"
-		| "result"
-		| "attendance"
-		| "event"
-		| "announcement";
-	type: "create" | "update" | "delete";
-	data?: any;
-	id?: number | string;
-}) {
+	relatedData,
+}: FormContainerProps & { relatedData?: any }) {
 	const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
 	const bgColor =
 		type === "create"
@@ -119,7 +120,7 @@ export default function FormModal({
 				</button>
 			</form>
 		) : type === "create" || type === "update" ? (
-			forms[table](setOpen, type, data)
+			forms[table](setOpen, type, data, relatedData)
 		) : (
 			"Form not found!"
 		);
