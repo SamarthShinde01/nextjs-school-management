@@ -14,7 +14,7 @@ export default function TeacherPage() {
 				</div>
 			</div>
 
-			{/* RIGHT */}
+			{/* RIGHt */}
 			<div className="w-full xl:w-1/3 flex flex-col gap-8">
 				<Announcement />
 			</div>
